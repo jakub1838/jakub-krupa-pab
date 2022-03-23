@@ -116,3 +116,4 @@ let jozio: Student;
 jozio._rokStudiów = 12
 
 
+.splice

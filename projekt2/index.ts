@@ -1,9 +1,9 @@
 import express from 'express'
 import {Request, Response} from 'express'
+import { sortAndDeduplicateDiagnostics } from 'typescript'
 
 
 const app = express()
-
 interface Note {
     title:string
     content:string
@@ -11,32 +11,49 @@ interface Note {
     tags?:string[]
     id?:number
 }
-
 const notes: Note[] = [] 
-
-//let note = notes.find( note => note.id === 30)
 app.use(express.json())
 
+//dodawanie ??
+app.post('/note', function(req: Request, res: Response){
+    const note : Note = req.body;
+    note.id=Date.now()
+    notes.push(note)
 
-app.post('/', function (req: Request, res: Response) {
-    Note 
-    res.status(201).send(note)
+    res.status(201).send(note.id);
+
 })
 
-//odczytanie notatki
-/*
-app.get('/', function (req, res) {
-    //const note = {title: "asd"}
-    const id = req.query.id
-    if (){
-        res.send(note).status(200)
-    }else{
-        res.send(404).send('Missing file')
-    }
-})*/
+//odczytanie
+app.get('/note/:id', function(req: Request, res: Response){
+    const id: number = parseInt(req.params.id, 10);
 
-app.delete('/', function (req: Request, res: Response ){
+        const item: Note = note.find(id);
     
+        if (item) {
+          return res.status(200).send(item);
+        }
+
+    res.status(404).send("item not found");
 })
+//edycja ??
+app.put('/note/:id', function(req: Request, res: Response){
+
+})
+//usuwanie
+app.delete('/note/:id', function(req: Request, res: Response){
+    const id: number = parseInt(req.params.id, 10);
+
+    const item: Note = note.find(id);
+    const del: Note = note.splice(id);
+    
+        if (item) {
+            del
+            return res.status(204);
+        }
+
+        res.status(400).send("item not found");
+})
+
 
 app.listen(3000)
