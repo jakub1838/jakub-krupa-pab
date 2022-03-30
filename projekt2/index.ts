@@ -1,9 +1,11 @@
 import express from 'express'
+import jsonwebtoken from 'jsonwebtoken'
 import {Request, Response} from 'express'
 import { sortAndDeduplicateDiagnostics } from 'typescript'
 
-
+const jwt = jsonwebtoken()
 const app = express()
+
 interface Note {
     title:string
     content:string
@@ -11,6 +13,7 @@ interface Note {
     tags?:string[]
     id?:number
 }
+
 const notes: Note[] = [] 
 app.use(express.json())
 
@@ -43,7 +46,6 @@ app.put('/note/:id', function(req: Request, res: Response){
 //usuwanie
 app.delete('/note/:id', function(req: Request, res: Response){
     const id: number = parseInt(req.params.id, 10);
-
     const item: Note = note.find(id);
     const del: Note = note.splice(id);
     
@@ -54,6 +56,11 @@ app.delete('/note/:id', function(req: Request, res: Response){
 
         res.status(400).send("item not found");
 })
+//login
+app.post('/login', function(req: Request, res: Response){
+    const username: User = req.params
+    const token = jwt.sign(payload, 'shhhhh')
 
+})
 
 app.listen(3000)
