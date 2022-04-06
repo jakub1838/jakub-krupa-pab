@@ -1,3 +1,4 @@
+/*
 //npx nodemon ./projekt2/indexedDB.ts
 
 const studenci: any [] = [] //stala, typ nie jest wymagany, chyba że nie ma przypisanej wartości
@@ -68,7 +69,7 @@ for(const stKey in studenci) {
 }
 
 //odwoływanie się do właściwości obiektu, pytajniki mówią że może taki obiekt nie istnieć
-const x = foo?.bar?.baz()
+//const x = foo?.bar?.baz()
 
 //sprawdzaie czy zmienna jest null/undefined i przypisanie
 let y 
@@ -116,3 +117,4 @@ let jozio: Student;
 jozio._rokStudiów = 12
 
 
+*/

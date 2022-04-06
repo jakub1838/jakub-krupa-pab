@@ -18,7 +18,7 @@ const notes: Note[] = []
 app.use(express.json())
 
 //dodawanie ??
-app.post('/note', function(req: Request, res: Response){
+app.post('/note', function(req, res){
     const note : Note = req.body;
     note.id=Date.now()
     notes.push(note)
@@ -28,7 +28,7 @@ app.post('/note', function(req: Request, res: Response){
 })
 
 //odczytanie
-app.get('/note/:id', function(req: Request, res: Response){
+app.get('/note/:id', function(req, res){
     const id: number = parseInt(req.params.id, 10);
 
         const item: Note = note.find(id);
@@ -40,11 +40,11 @@ app.get('/note/:id', function(req: Request, res: Response){
     res.status(404).send("item not found");
 })
 //edycja ??
-app.put('/note/:id', function(req: Request, res: Response){
+app.put('/note/:id', function(req, res){
 
 })
 //usuwanie
-app.delete('/note/:id', function(req: Request, res: Response){
+app.delete('/note/:id', function(req, res){
     const id: number = parseInt(req.params.id, 10);
     const item: Note = note.find(id);
     const del: Note = note.splice(id);
@@ -56,11 +56,13 @@ app.delete('/note/:id', function(req: Request, res: Response){
 
         res.status(400).send("item not found");
 })
+/*
 //login
 app.post('/login', function(req: Request, res: Response){
     const username: User = req.params
     const token = jwt.sign(payload, 'shhhhh')
 
 })
+*/
 
 app.listen(3000)
