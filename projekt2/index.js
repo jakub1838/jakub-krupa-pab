@@ -4,6 +4,7 @@ var express_1 = require("express");
 var app = (0, express_1["default"])();
 var notes = [];
 app.use(express_1["default"].json());
+
 //dodawanie
 app.post('/note', function (req, res) {
     var note = req.body;
