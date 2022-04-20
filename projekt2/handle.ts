@@ -170,6 +170,7 @@ export class Handle{
             throw new Error("User not found")
     }
 
+    
     //usuwanie
     DeleteNote(id: number){
         this._notes.splice(this.FindNoteIndex(id), 1)

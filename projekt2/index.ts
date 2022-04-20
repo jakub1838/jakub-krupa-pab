@@ -123,7 +123,7 @@ app.post('/login', function (req: Request, res: Response) {
         res.status(200).send(tmp.token)
     else
         res.status(400).send("Something went wrong")
-    })
+})
 
 
 app.delete('/note/:id',function (req: Request, res: Response) {
@@ -140,7 +140,7 @@ app.delete('/note/:id',function (req: Request, res: Response) {
         res.status(401).send(error)
     }
         res.status(200).send("Note removed")
-    })
+})
 
 app.delete('/tag/:id',function (req: Request, res: Response) {
     try {
@@ -149,7 +149,7 @@ app.delete('/tag/:id',function (req: Request, res: Response) {
         res.status(401).send(error)
     }
         res.status(200).send("Tag removed")
-    })
+})
 
 
 app.put('/tag/:id',function (req: Request, res: Response) {
@@ -162,6 +162,7 @@ app.put('/tag/:id',function (req: Request, res: Response) {
         res.status(404).send(error)
     }
     sHandle.Update(editedTag, +req.params.id)
-    })
+})
+
 
 app.listen(3000)
