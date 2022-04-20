@@ -13,13 +13,13 @@ app.get('/', function (req, res) {
     if (operation == dodaj) {
         res.send(dodaj.toString());
     }
-    else if (operation == usun) {
+    else if (operation == "usun") {
         res.send(usun.toString());
     }
-    else if (operation == podziel) {
+    else if (operation == "podziel") {
         res.send(podziel.toString());
     }
-    else if (operation == pomnoz) {
+    else if (operation == "pomnoz") {
         res.send(pomnoz.toString());
     }
 });
