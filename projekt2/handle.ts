@@ -35,7 +35,9 @@ export class Handle{
                 this.updateStorage();
                 break;
             case "Note":
-                //dodać obsługę tagów
+                let tmpTags:Tag[] = []
+                stored.tags.forEach((tag: Tag) => tmpTags.push(this.FindTag(String(tag.name))))
+                stored.tags = tmpTags
                 this._notes.push(stored)
                 this.updateStorage();
                 break;
