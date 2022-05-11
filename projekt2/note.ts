@@ -9,6 +9,7 @@ export class Note{
     id: number
     user: User
     isPublic: boolean
+    
     constructor(title: string, content: string, tags: Tag[], user: User, isPublic?: boolean) {
         this.title = title
         this.content = content

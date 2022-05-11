@@ -8,7 +8,7 @@ export class Handle{
     private _tags: Tag[] = [];
     private _users: User[] = [];
     private storeFile = "Storage.json"
-    private usertest = new User("Test", "password123")
+
 
     constructor(){
         this.read()

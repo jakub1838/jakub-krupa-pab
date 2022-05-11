@@ -1,12 +1,21 @@
 import jwt from 'jsonwebtoken';
-import { Note } from './note';
+import e from 'express';
 
 export class User{
     id: number
+    login: string
     token: string
-    constructor(login: string, password: string) {
-        this.token = jwt.sign(login.concat(password), "password123")
+    admin: boolean
+
+    constructor(login: string, password: string, admin?: string) {
+        this.login = login 
+        this.token = jwt.sign(login.concat(password), "123")
+        if(admin == "admin")
+        this.admin = true
+        else
+        this.admin = false
         this.id = Date.now()
+    }
     }
     static DecodeHeader(header: string): string {
         const tmp = header.split(" ", 2)
