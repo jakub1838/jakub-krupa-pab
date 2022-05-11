@@ -16,7 +16,8 @@ export class User{
         this.admin = false
         this.id = Date.now()
     }
-    }
+    
+    
     static DecodeHeader(header: string): string {
         const tmp = header.split(" ", 2)
         if (!(tmp[0] === "Bearer"))

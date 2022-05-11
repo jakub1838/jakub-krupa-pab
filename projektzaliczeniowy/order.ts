@@ -1,17 +1,19 @@
-import { table } from './table'
-import { employee } from './employee'
-import { dish } from './dish'
-export class order{
-    employee: employee[]
-    dishes: dish[]
+import { Table } from './table'
+import { Employee } from './employee'
+import { Dish } from './dish'
+export class Order{
+    employee: Employee[]
+    dishes: Dish[]
     status: string
-    table: table[]
+    table: Table[]
     total: number
-    constructor(employee: employee[], dishes: dish[], status: string, table: table[], total: number){
+    id : number
+    constructor(employee: Employee[], dishes: Dish[], status: string, table: Table[], total: number){
         this.employee = employee
         this.dishes = dishes
         this.status = status
         this.table = table
         this.total = total
+        this.id = Date.now()
     }
 }
