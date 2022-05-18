@@ -17,3 +17,10 @@ export class Order{
         this.id = Date.now()
     }
 }
+
+export enum status{
+    waiting = "waiting",
+    preparing = "preparing",
+    handingout = "handingout",
+    completed = "completed"
+}

@@ -19,6 +19,10 @@ export class Handle{
 
     private storeFile = "Storage.json"
 
+    constructor(){
+        this.read()
+    }
+
     get restaurant(): Restaurant[] {
         return this._Restaurant;
     }
@@ -40,6 +44,8 @@ export class Handle{
     get order(): Order[] {
         return this._Order;
     }
+
+    
 
     Store(stored: any){
         switch(stored.constructor.name){
@@ -71,43 +77,6 @@ export class Handle{
                 throw new Error("Type is not supported")
         }
     }
-    //do poprawienia
-    /*
-    FindTable(id: any): Table {
-        let table
-        switch (id.constructor.Name){
-            case "Name":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.name === name){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-                break;
-            case "Status":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.status === status){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-            case "Id":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.id === id){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-        }
-        if (table)
-            return table
-        else 
-            console.log("Table not found")
-    }
-    */
 
     private async updateStorage(): Promise<void>{
         const tmp = [this._Restaurant, this._Table, this._Reservations, this._Product, this._Dish, this._Order]
@@ -118,6 +87,28 @@ export class Handle{
         } catch (err) {
             console.log(err)
         }
+    }
+
+    private async read(): Promise<void>{
+        try {
+            const data = await fs.promises.readFile(this.storeFile, 'utf-8');
+            this._Restaurant = this.Decode(JSON.parse(data)[0])
+            this._Employee = this.Decode(JSON.parse(data)[1])
+            this._Table = this.Decode(JSON.parse(data)[2])
+            this._Reservations = this.Decode(JSON.parse(data)[3])
+            this._Product = this.Decode(JSON.parse(data)[4])
+            this._Dish = this.Decode(JSON.parse(data)[5])
+            this._Order = this.Decode(JSON.parse(data)[6])
+            return
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    private Decode<Type>(arg: Type[]): Type[]{
+        let tmp: Type[] = [];
+        arg.forEach(element => tmp.push(element))
+        return tmp;
     }
 }
 
