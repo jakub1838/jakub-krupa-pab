@@ -10,3 +10,8 @@ export class Dish {
         this.id = Date.now()
     }
 }
+
+export enum category{
+    soup = "soup",
+    maindish = "maindish"
+}

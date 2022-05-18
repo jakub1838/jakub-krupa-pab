@@ -19,12 +19,12 @@
   "homepage": "https://github.com/jakub1838/jakub-krupa-pab#readme",
   "dependencies": {
     "@types/express": "^4.17.13",
-    "@types/node": "^17.0.21",
-    "express": "^4.17.3",
+    "@types/node": "^17.0.34",
+    "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
     "nodemon": "^2.0.15",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.4"
   },
   "devDependencies": {},
   "description": ""

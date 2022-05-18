@@ -4,6 +4,7 @@ export class Product {
     quantity: number
     unitOfMeasure: string
     id: number
+
     constructor(name: string, price: number, quantity: number, unitOfMeasure: string){
         this.name = name;
         this.price = price;
@@ -11,4 +12,10 @@ export class Product {
         this.unitOfMeasure = unitOfMeasure;
         this.id = Date.now()
     }
+}
+
+export enum unitOfMeasure {
+    kg = "kg",
+    pieces = "p",
+    liters = "l"
 }

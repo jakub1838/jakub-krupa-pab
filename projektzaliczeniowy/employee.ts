@@ -10,3 +10,8 @@ export class Employee {
         this.id = Date.now()
     }
 }
+export enum category{
+    cook = "cook",
+    waiter = "waiter",
+    manager = "manager"
+}
