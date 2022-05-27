@@ -7,13 +7,19 @@ export class Order{
     status: string
     table: Table[]
     total: number
-    id : number
-    constructor(employee: Employee[], dishes: Dish[], status: string, table: Table[], total: number){
+   // _id : number
+    constructor(employee: Employee[], dishes: Dish[], status: Status, table: Table[], total: number){
         this.employee = employee
         this.dishes = dishes
         this.status = status
         this.table = table
         this.total = total
-        this.id = Date.now()
+        //this._id = Date.now()
     }
+}
+export enum Status{
+    folded = "folded",
+    inProgress = "inProgress",
+    realized = "realized",
+    bill = "bill"
 }

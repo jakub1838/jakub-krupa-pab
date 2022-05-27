@@ -2,12 +2,12 @@ export class Dish {
     name: string
     price: number
     category: string
-    id : number
-    constructor(name: string, price: number, category: string){
+    //_id : number
+    constructor(name: string, price: number, category: category){
         this.name = name
         this.price = price
         this.category = category
-        this.id = Date.now()
+        //this._id = Date.now()
     }
 }
 

@@ -5,7 +5,6 @@ export class Restaurant {
     nip: string
     email: string
     www: string
-    id: number
     
     constructor(name: string, addres: string, telephone: string, nip: string, email: string, www: string){
         this.name = name;
@@ -14,6 +13,5 @@ export class Restaurant {
         this.nip = nip;
         this.email = email;
         this.www = www;
-        this.id = Date.now()
     }
 }

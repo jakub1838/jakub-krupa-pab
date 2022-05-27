@@ -7,108 +7,127 @@ import { Product } from './product'
 import { Dish } from './dish'
 import { Order } from './order'
 import { isConstructorDeclaration } from 'typescript';
+import { RestaurantModel, DishModel, EmployeeModel, OrderModel, ProductModel, ReservationsModel, TableModel} from './dbconfig';
+
 
 export class Handle{
-    private _Restaurant: Restaurant[] = [];
-    private _Employee: Employee[] = [];
-    private _Table: Table[] = [];
-    private _Reservations: Reservations[] = [];
-    private _Product: Product[] = [];
-    private _Dish: Dish[] = [];
-    private _Order: Order[] = [];
-
-    private storeFile = "Storage.json"
-
-    get restaurant(): Restaurant[] {
-        return this._Restaurant;
+    constructor(){
+        
     }
-    get employee(): Employee[] {
-        return this._Employee;
+    
+    async getrestaurant(){
+        return await RestaurantModel.findOne()
     }
-    get table(): Table[] {
-        return this._Table;
+    async getemploteyee(_id: number){
+        return await EmployeeModel.findOne({_id: _id})
     }
-    get reservations(): Reservations[] {
-        return this._Reservations;
+    async getDish(name: string){
+        return await DishModel.findOne({name: name})
     }
-    get product(): Product[] {
-        return this._Product;
+    async getOrder(_id: number){
+        return await OrderModel.findOne({_id: _id})
     }
-    get dish(): Dish[] {
-        return this._Dish;
+    async getProduct(name: string){
+        return await ProductModel.findOne({name: name})
     }
-    get order(): Order[] {
-        return this._Order;
+    async getReservation(_id: number){
+        return await ReservationsModel.findOne({_id: _id})
+    }
+    async getTable(name: string){
+        return await TableModel.findOne({name: name})
     }
 
-    Store(stored: any){
-        switch(stored.constructor.name){
-            case "Restaurant":
-                this._Restaurant.push(stored)
-                this.updateStorage();
-                break;
-            case "Table":
-                this._Table.push(stored)
-                this.updateStorage();
-                break;
-            case "Reservations":
-                this._Reservations.push(stored)
-                this.updateStorage();
-                break;
-            case "Product":
-                this._Product.push(stored)
-                this.updateStorage();
-                break;
-            case "Dish":
-                this._Dish.push(stored)
-                this.updateStorage();
-                break;
-            case "Order":
-                this._Order.push(stored)
-                this.updateStorage();
-                break;
-            default:
-                throw new Error("Type is not supported")
-        }
+    async getEmployees(){
+        return await EmployeeModel.find()
     }
-    //do poprawienia
-    /*
-    FindTable(id: any): Table {
-        let table
-        switch (id.constructor.Name){
-            case "Name":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.name === name){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-                break;
-            case "Status":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.status === status){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-            case "Id":
-                table = this._Table.find(function (table: Table): boolean{
-                    if(table.id === id){
-                        return true
-                    }else{
-                        return false
-                    }
-                })
-        }
-        if (table)
-            return table
-        else 
-            console.log("Table not found")
+    async getDishes(){
+        return await DishModel.find()
     }
-    */
+    async getOrders(){
+        return await OrderModel.find()
+    }
+    async getProducts(){
+        return await ProductModel.find()
+    }
+    async getReservations(){
+        return await ReservationsModel.find()
+    }
+    async getTables(){
+        return await TableModel.find()
+    }
 
+    async postRestaurant(restaurant: Restaurant){
+        const newrestaurant = new RestaurantModel(restaurant)
+        return await newrestaurant.save()
+    }
+    async postEmployee(employee: Employee){
+        const newemployee = new EmployeeModel(employee)
+        return await newemployee.save()
+    }
+    async postDish(dish: Dish){
+        const newdish = new DishModel(dish)
+        return await newdish.save()
+    }
+    async postOrder(order: Order){
+        const neworder = new OrderModel(order)
+        return await neworder.save()
+    }
+    async postProduct(product: Product){
+        const newproduct = new ProductModel(product)
+        return await newproduct.save()
+    }
+    async postReservation(reservation: Reservations){
+        const newreservation = new ReservationsModel(reservation)
+        return await newreservation.save()
+    }
+    async postTable(table: Table){
+        const newtable = new TableModel(table)
+        return await newtable.save()
+    }
+
+    async putRestaurant(restaurant: Restaurant, name: string){
+        return await RestaurantModel.findOneAndUpdate({name: name}, restaurant)
+    }
+    async putEmployee(employee: Employee, _id: number){
+        return await EmployeeModel.findOneAndUpdate({_id: _id}, employee)
+    }
+    async putDish(dish: Dish, name: string){
+        return await DishModel.findOneAndUpdate({name: name}, dish)
+    }
+    async putOrder(order: Order, _id: number){
+        return await OrderModel.findOneAndUpdate({_id: _id}, order)
+    }
+    async putProduct(product: Product, name: string){
+        return await ProductModel.findOneAndUpdate({name: name}, product)
+    }
+    async putReservation(reservation: Reservations, _id: number){
+        return await ReservationsModel.findOneAndUpdate({_id: _id}, reservation)
+    }
+    async putTable(table: Table, name: string){
+        return await TableModel.findOneAndUpdate({name: name}, table)
+    }
+
+   
+    async deleteEmployee(_id: number){
+        return await EmployeeModel.findOneAndDelete({_id: _id})
+    }
+    async deleteDish(name: string){
+        return await DishModel.findOneAndDelete({name: name})
+    }
+    async deleteOrder(_id: number){
+        return await OrderModel.findOneAndDelete({_id: _id})
+    }
+    async deleteProduct(name: string){
+        return await ProductModel.findOneAndDelete({name: name})
+    }
+    async deleteReservation(_id: number){
+        return await ReservationsModel.findOneAndDelete({_id: _id})
+    }
+    async deleteTable(name: string){
+        return await TableModel.findOneAndDelete({name: name})
+    }
+
+/*
     private async updateStorage(): Promise<void>{
         const tmp = [this._Restaurant, this._Table, this._Reservations, this._Product, this._Dish, this._Order]
 
@@ -118,6 +137,6 @@ export class Handle{
         } catch (err) {
             console.log(err)
         }
-    }
+    }*/
 }
 
