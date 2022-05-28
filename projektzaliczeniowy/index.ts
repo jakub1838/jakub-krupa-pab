@@ -8,8 +8,8 @@ import { Order } from "./order";
 import { demand, Product } from "./product";
 import { Reservations } from "./reservations";
 import { Restaurant } from "./restaurant";
-import { Table } from "./table";
-import { DishModel } from "./dbconfig";
+import { Status, Table } from "./table";
+import { DishModel, ReservationsModel } from "./dbconfig";
 import { Handle } from "./handle";
 
 const app = express();
@@ -17,11 +17,10 @@ app.use(express.json());
 const StorageHandler = new Handle();
 
 app.get("/restaurant", async (req: Request, res: Response) => {
-  const restaurant = await StorageHandler.getrestaurant();
-  res.status(200).send(restaurant);
+  res.status(200).send(await StorageHandler.getRestaurant());
 })
 app.get("/employee/:id", async (req: Request, res: Response) => {
-  const employee = await StorageHandler.getemploteyee(+req.params.id);
+  const employee = await StorageHandler.getEmployee(req.params.id);
   if (employee) {
     res.status(200).send(employee);
   } 
@@ -39,7 +38,7 @@ app.get("/dish/:name", async (req: Request, res: Response) => {
     }
 })
 app.get("/order/:id", async (req: Request, res: Response) => {
-    const order = await StorageHandler.getOrder(+req.params.id);
+    const order = await StorageHandler.getOrder(req.params.id);
     if (order) {
         res.status(200).send(order);
     }
@@ -57,7 +56,7 @@ app.get("/product/:name", async (req: Request, res: Response) => {
     }
 })
 app.get("/reservation/:id", async (req: Request, res: Response) => {
-    const reservation = await StorageHandler.getReservation(+req.params.id);
+    const reservation = await StorageHandler.getReservation(req.params.id);
     if (reservation) {
         res.status(200).send(reservation);
     }
@@ -84,6 +83,7 @@ app.get("/dishes", async (req: Request, res: Response) => {
 })
 app.get("/orders", async (req: Request, res: Response) => {
     const orders = await StorageHandler.getOrders();
+
     res.status(200).send(orders)
 })
 app.get("/products", async (req: Request, res: Response) => {
@@ -98,16 +98,63 @@ app.get("/tables", async (req: Request, res: Response) => {
     const tables = await StorageHandler.getTables();
     res.status(200).send(tables)
 })
-app.get("/product/sort/:order", async (req: Request, res: Response) => {
-    if(req.params.order == "asc"){
+app.get("/tables/free", async (req: Request, res: Response) => {
+    const now = new Date(Date.now());
+    let freeTables: Table[] = [];
+    let reservations = (await StorageHandler.getReservations()).filter(reservation => reservation.start < now && reservation.end > now ); 
+    let tmpTables = await StorageHandler.getTables();
+    let occuipiedTables = (await StorageHandler.getTables()).filter(i => reservations.some(reservations => reservations.table == i));
+    tmpTables.forEach(i => {
+        if (!occuipiedTables.includes(i)) {
+            freeTables.push(i);
+        }
+    })
+    res.status(200).send(freeTables)
+})
+app.get("/table/free", async (req: Request, res: Response) => {
+    if(!req.body.numberOfPeople || !req.body.date) {
+        return res.status(400).send("Bad request");
+    }
+    const now = new Date(Date.now());
+    let freeTables: Table[] = [];
+    let reservations = (await StorageHandler.getReservations()).filter(reservation => reservation.start < now && reservation.end > now );
+    let tmpTables = await StorageHandler.getTables();
+    let occuipiedTables = (await StorageHandler.getTables()).filter(i => reservations.some(reservations => reservations.table == i));
+    tmpTables.forEach(i => {
+        if (!occuipiedTables.includes(i)) {
+            freeTables.push(i);
+        }
+    })
+    let freeTableForDate = freeTables.filter(i => i.numberOfPeople >= req.body.numberOfPeople);
+    res.status(200).send(freeTableForDate);
+})
+app.get("/products/sort/:number/:order", async (req: Request, res: Response) => {
+    switch (req.params.order) {
+    case "asc": {
         const products = await StorageHandler.getProducts();
         products.sort((a, b) => a.name.localeCompare(b.name));
+        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
         res.status(200).send(products)
+        break;
     }
+    case "desc": {
+        const products = await StorageHandler.getProducts();
+        products.sort((a, b) => b.name.localeCompare(a.name));
+        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
+        res.status(200).send(products)
+        break;
+    }
+    default: {
+        const products = await StorageHandler.getProducts();
+        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
+        res.status(200).send(products)
+        break;
+    }
+}
 })
 app.post("/employee", async (req: Request, res: Response) => {
     if (!req.body.name || !req.body.surname || !req.body.category){
-        res.status(400).send("Bad request");
+        return res.status(400).send("Bad request");
     }
     const employeebody = new Employee(req.body.name, req.body.surname, req.body.category);
     const employee = await StorageHandler.postEmployee(employeebody);
@@ -122,12 +169,21 @@ app.post("/dish", async (req: Request, res: Response) => {
     res.status(200).send(dish);
 })
 app.post("/order", async (req: Request, res: Response) => {
-    if (!req.body.employee || !req.body.dishes || !req.body.status || !req.body.table || !req.body.total){
-        res.status(400).send("Bad request");
+    if(!req.headers.authorization){
+        return res.status(400).send("Bad request");
     }
-    //login employee
-
-    const orderbody = new Order(req.body.table, req.body.employee, req.body.dishes, req.body.status, req.body.total);
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded: any = jsonwebtoken.verify(token, "2137");
+    if(!decoded){
+        return res.status(400).send("Bad request");
+    }
+    const employee = await StorageHandler.getEmployee(decoded.id);
+    const table = await StorageHandler.getTable(req.body.table);
+    //tutaj 
+    if (!req.body.employee || !req.body.dishes || !req.body.status || !req.body.table){
+        return res.status(400).send("Bad request");
+    }
+    const orderbody = new Order(req.body.employee, req.body.dishes, req.body.status, req.body.table, req.body.total);
     const order = await StorageHandler.postOrder(orderbody);
     res.status(200).send(order);
 })
@@ -140,28 +196,50 @@ app.post("/product", async (req: Request, res: Response) => {
     const product = await StorageHandler.postProduct(productbody);
     res.status(200).send(product);
 })
-app.post("/reservation", async (req: Request, res: Response) => {
+app.post("/reservations", async (req: Request, res: Response) => {
     if (!req.body.client || !req.body.table || !req.body.start || !req.body.end){
-        res.status(400).send("Bad request");
+        return res.status(400).send("Bad request");
     }
-    //check if reservation dont overlap 
-
-    const reservationbody = new Reservations(req.body.table, req.body.start, req.body.end, req.body.client);
-    const reservation = await StorageHandler.postReservation(reservationbody);
-    res.status(200).send(reservation);
+    const _Reservations = await StorageHandler.getReservations()
+    const _Tables = await StorageHandler.getTables()
+    let reservations = _Reservations.filter(i => (req.body.start <= i.start && i.start < req.body.end) || (req.body.end >= i.end && i.end > req.body.start))
+    let freeTables = _Tables.filter(i => !reservations.some(reservations => reservations.table == i))
+    const table = freeTables.find(table => table.numberOfPeople >= req.body.numberOfPeople && table.status != Status.outoforder)
+    if (!table){
+        const tmp = new Reservations(req.body.table, req.body.start, req.body.end, req.body.client )
+        await StorageHandler.postReservation(tmp)
+        res.status(200).send(table)
+    }else{
+        return res.status(404).send("No free table")
+    }
 })
 app.post("/table", async (req: Request, res: Response) => {
     if (!req.body.name || !req.body.status || !req.body.numberOfPeople){
-        res.status(400).send("Bad request");
+       return res.status(400).send("Bad request");
     }
-    const tablebody = new Table(req.body.name, req.body.status, req.body.numberOfPeople);
+    const tablebody = new Table(req.body.name, req.body.numberOfPeople, req.body.status,);
     const table = await StorageHandler.postTable(tablebody);
     res.status(200).send(table);
+})
+app.post("/login/:id", async (req: Request, res: Response) => {
+    let employee : Employee
+    try{
+        employee = await StorageHandler.getEmployee(req.params.id);
+        if(employee){
+            res.status(200).send(jsonwebtoken.sign({employee: employee}, "2137", {expiresIn: "1h"}));
+        }
+        else{
+            return res.status(404).send("Employee not found");
+        }
+    }
+    catch(err){
+        return res.status(404).send("Employee not found");
+    }
 })
 
 app.put("/employee/:id", async (req: Request, res: Response) => {
     const employeebody = new Employee(req.body.name ?? undefined, req.body.surname ?? undefined, req.body.category ?? undefined);
-    const employee = await StorageHandler.putEmployee(employeebody, +req.params.id);
+    const employee = await StorageHandler.putEmployee(employeebody, req.params.id);
     res.status(200).send(employee);
 })
 app.put("/dish/:name", async (req: Request, res: Response) => {
@@ -171,7 +249,7 @@ app.put("/dish/:name", async (req: Request, res: Response) => {
 })
 app.put("/order/:id", async (req: Request, res: Response) => {
     const orderbody = new Order(req.body.table ?? undefined, req.body.employee ?? undefined, req.body.dishes ?? undefined, req.body.status ?? undefined, req.body.total ?? undefined);
-    const order = await StorageHandler.putOrder(orderbody, +req.params.id);
+    const order = await StorageHandler.putOrder(orderbody, req.params.id);
     res.status(200).send(order);
 })
 app.put("/product/:name", async (req: Request, res: Response) => {
@@ -181,7 +259,7 @@ app.put("/product/:name", async (req: Request, res: Response) => {
 })
 app.put("/reservation/:id", async (req: Request, res: Response) => {
     const reservationbody = new Reservations(req.body.table ?? undefined, req.body.start ?? undefined, req.body.end ?? undefined, req.body.client ?? undefined);
-    const reservation = await StorageHandler.putReservation(reservationbody, +req.params.id);
+    const reservation = await StorageHandler.putReservation(reservationbody, req.params.id);
     res.status(200).send(reservation);
 })
 app.put("/table/:name", async (req: Request, res: Response) => {
@@ -189,9 +267,14 @@ app.put("/table/:name", async (req: Request, res: Response) => {
     const table = await StorageHandler.putTable(tablebody, req.params.name);
     res.status(200).send(table);
 })
+app.put("/restaurant/", async (req: Request, res: Response) => {
+    const restaurantbody = new Restaurant(req.body.name ?? undefined, req.body.addres ?? undefined, req.body.telephone ?? undefined, req.body.nip ?? undefined, req.body.email ?? undefined, req.body.www ?? undefined);
+    const restaurant = await StorageHandler.putRestaurant(restaurantbody, req.params.id);
+    res.status(200).send(restaurant);
+})
 
 app.delete("/employee/:id", async (req: Request, res: Response) => {
-    const employee = await StorageHandler.deleteEmployee(+req.params.id);
+    const employee = await StorageHandler.deleteEmployee(req.params.id);
     res.status(200).send("Deleted");
 })
 app.delete("/dish/:name", async (req: Request, res: Response) => {
@@ -199,7 +282,7 @@ app.delete("/dish/:name", async (req: Request, res: Response) => {
     res.status(200).send("Deleted");
 })
 app.delete("/order/:id", async (req: Request, res: Response) => {
-    const order = await StorageHandler.deleteOrder(+req.params.id);
+    const order = await StorageHandler.deleteOrder(req.params.id);
     res.status(200).send("Deleted");
 })
 app.delete("/product/:name", async (req: Request, res: Response) => {
@@ -207,7 +290,7 @@ app.delete("/product/:name", async (req: Request, res: Response) => {
     res.status(200).send("Deleted");
 })
 app.delete("/reservation/:id", async (req: Request, res: Response) => {
-    const reservation = await StorageHandler.deleteReservation(+req.params.id);
+    const reservation = await StorageHandler.deleteReservation(req.params.id);
     res.status(200).send("Deleted");
 })
 app.delete("/table/:name", async (req: Request, res: Response) => {

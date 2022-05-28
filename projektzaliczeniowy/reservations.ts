@@ -4,12 +4,12 @@ export class Reservations {
     start: Date
     end: Date
     client: string
-    _id: number
+    //_id: number
     constructor(table: Table[], start: Date, end: Date, client: string){
         this.table = table
         this.start = start
         this.end = end
         this.client = client
-        this._id = Date.now()
+        //this._id = Date.now()
     }
 }

@@ -15,22 +15,22 @@ export class Handle{
         
     }
     
-    async getrestaurant(){
+    async getRestaurant(){
         return await RestaurantModel.findOne()
     }
-    async getemploteyee(_id: number){
+    async getEmployee(_id: string){
         return await EmployeeModel.findOne({_id: _id})
     }
     async getDish(name: string){
         return await DishModel.findOne({name: name})
     }
-    async getOrder(_id: number){
+    async getOrder(_id: string){
         return await OrderModel.findOne({_id: _id})
     }
     async getProduct(name: string){
         return await ProductModel.findOne({name: name})
     }
-    async getReservation(_id: number){
+    async getReservation(_id: string){
         return await ReservationsModel.findOne({_id: _id})
     }
     async getTable(name: string){
@@ -88,19 +88,19 @@ export class Handle{
     async putRestaurant(restaurant: Restaurant, name: string){
         return await RestaurantModel.findOneAndUpdate({name: name}, restaurant)
     }
-    async putEmployee(employee: Employee, _id: number){
+    async putEmployee(employee: Employee, _id: string){
         return await EmployeeModel.findOneAndUpdate({_id: _id}, employee)
     }
     async putDish(dish: Dish, name: string){
         return await DishModel.findOneAndUpdate({name: name}, dish)
     }
-    async putOrder(order: Order, _id: number){
+    async putOrder(order: Order, _id: string){
         return await OrderModel.findOneAndUpdate({_id: _id}, order)
     }
     async putProduct(product: Product, name: string){
         return await ProductModel.findOneAndUpdate({name: name}, product)
     }
-    async putReservation(reservation: Reservations, _id: number){
+    async putReservation(reservation: Reservations, _id: string){
         return await ReservationsModel.findOneAndUpdate({_id: _id}, reservation)
     }
     async putTable(table: Table, name: string){
@@ -108,19 +108,19 @@ export class Handle{
     }
 
    
-    async deleteEmployee(_id: number){
+    async deleteEmployee(_id: string){
         return await EmployeeModel.findOneAndDelete({_id: _id})
     }
     async deleteDish(name: string){
         return await DishModel.findOneAndDelete({name: name})
     }
-    async deleteOrder(_id: number){
+    async deleteOrder(_id: string){
         return await OrderModel.findOneAndDelete({_id: _id})
     }
     async deleteProduct(name: string){
         return await ProductModel.findOneAndDelete({name: name})
     }
-    async deleteReservation(_id: number){
+    async deleteReservation(_id: string){
         return await ReservationsModel.findOneAndDelete({_id: _id})
     }
     async deleteTable(name: string){

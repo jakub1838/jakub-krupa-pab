@@ -1,7 +1,7 @@
 export class Table {
     name: string
     numberOfPeople: number
-    status: string
+    status: Status
     //_id: number
 
     constructor(name: string, numberOfPeople: number, status: Status){
@@ -13,5 +13,6 @@ export class Table {
 }
 export enum Status{
     free = "free",
-    occupied = "occupied"
+    occupied = "occupied",
+    outoforder = "outoforder"
 }

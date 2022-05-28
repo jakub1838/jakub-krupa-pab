@@ -3,7 +3,6 @@ export class Product {
     price: number
     quantity: number
     unitOfMeasure: string
-    //_id: number
     demand: string
 
     constructor(name: string, price: number, quantity: number, unitOfMeasure: unitOfMeasure, demand: demand) {
@@ -11,7 +10,6 @@ export class Product {
         this.price = price;
         this.quantity = quantity;
         this.unitOfMeasure = unitOfMeasure;
-        //this._id = Date.now()
         this.demand = demand;
     }
 }

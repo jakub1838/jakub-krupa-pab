@@ -6,6 +6,7 @@ const DishSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true
   },
   price: {
     type: Number,
@@ -61,6 +62,7 @@ const ProductSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   price: {
     type: Number,
@@ -74,6 +76,10 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  demand: {
+    type: String,
+    required: true,
+  }
 });
 export const ProductModel = mongoose.model("Product", ProductSchema);
 
@@ -128,6 +134,7 @@ const TableSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   numberOfPeople: {
     type: Number,
