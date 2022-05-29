@@ -2,17 +2,19 @@ import { Table } from './table'
 import { Employee } from './employee'
 import { Dish } from './dish'
 export class Order{
-    employee: Employee[]
+    employee: Employee
     dishes: Dish[] = []
     status: string
-    table: Table[]
+    table: Table
     total: number
+    date: Date
    // _id : number
-    constructor(employee: Employee[], dishes: Dish[], status: Status, table: Table[], total?: number){
+    constructor(employee: Employee, dishes: Dish[], status: Status, table: Table, total?: number){
         this.employee = employee
         this.dishes = dishes
         this.status = status
         this.table = table
+        this.date = new Date(Date.now())
         let tmp = 0 
         console.log(dishes[2])
         dishes.forEach(element => {tmp+=element.price});

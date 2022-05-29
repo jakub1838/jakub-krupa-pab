@@ -36,23 +36,30 @@ export const EmployeeModel =  mongoose.model("Employee", EmployeeSchema);
 
 const OrderSchema = new mongoose.Schema({
   employee: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee",
     required: true,
   },
-  dishes: {
-    type: String,
+  dishes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Dish",
     required: true,
-  },
+  }],
   status: {
     type: String,
     required: true,
   },
   table: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Table",
     required: true,
   },
   total: {
     type: Number,
+    required: true,
+  },
+  date:{
+    type: Date,
     required: true,
   }
 });
@@ -85,7 +92,8 @@ export const ProductModel = mongoose.model("Product", ProductSchema);
 
 const ReservationsSchema = new mongoose.Schema({
   table: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Table",
     required: true,
   },
   start: {
@@ -94,6 +102,7 @@ const ReservationsSchema = new mongoose.Schema({
   },
   end: {
     type: Date,
+    required: true,
   },
   client: {
     type: String,

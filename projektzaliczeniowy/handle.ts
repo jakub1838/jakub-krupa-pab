@@ -25,13 +25,13 @@ export class Handle{
         return await DishModel.findOne({name: name})
     }
     async getOrder(_id: string){
-        return await OrderModel.findOne({_id: _id})
+        return await OrderModel.findOne({_id: _id}).populate('employee dishes table')
     }
     async getProduct(name: string){
         return await ProductModel.findOne({name: name})
     }
     async getReservation(_id: string){
-        return await ReservationsModel.findOne({_id: _id})
+        return await ReservationsModel.findOne({_id: _id}).populate('table')
     }
     async getTable(name: string){
         return await TableModel.findOne({name: name})
@@ -43,14 +43,14 @@ export class Handle{
     async getDishes(){
         return await DishModel.find()
     }
-    async getOrders(){
-        return await OrderModel.find()
+    async getOrders():Promise<Order[]>{
+        return await OrderModel.find().populate('employee dishes table')
     }
     async getProducts(){
         return await ProductModel.find()
     }
-    async getReservations(){
-        return await ReservationsModel.find()
+    async getReservations(): Promise<Reservations[]>{
+        return await ReservationsModel.find().populate('table')
     }
     async getTables(){
         return await TableModel.find()
@@ -107,7 +107,6 @@ export class Handle{
         return await TableModel.findOneAndUpdate({name: name}, table)
     }
 
-   
     async deleteEmployee(_id: string){
         return await EmployeeModel.findOneAndDelete({_id: _id})
     }
@@ -126,17 +125,5 @@ export class Handle{
     async deleteTable(name: string){
         return await TableModel.findOneAndDelete({name: name})
     }
-
-/*
-    private async updateStorage(): Promise<void>{
-        const tmp = [this._Restaurant, this._Table, this._Reservations, this._Product, this._Dish, this._Order]
-
-        console.log(JSON.stringify(tmp))
-        try {
-            await fs.promises.writeFile(this.storeFile, JSON.stringify(tmp));
-        } catch (err) {
-            console.log(err)
-        }
-    }*/
 }
 

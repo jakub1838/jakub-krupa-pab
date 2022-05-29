@@ -11,6 +11,7 @@ import { Restaurant } from "./restaurant";
 import { Status, Table } from "./table";
 import { DishModel, ReservationsModel } from "./dbconfig";
 import { Handle } from "./handle";
+import { table } from "console";
 
 const app = express();
 app.use(express.json());
@@ -101,21 +102,17 @@ app.get("/tables", async (req: Request, res: Response) => {
 app.get("/tables/free", async (req: Request, res: Response) => {
     const now = new Date(Date.now());
     let freeTables: Table[] = [];
-    let reservations = (await StorageHandler.getReservations()).filter(reservation => reservation.start < now && reservation.end > now ); 
+    //let reservations = (await StorageHandler.getReservations()).filter(reservation => reservation.start < now && reservation.end > now ); 
     let tmpTables = await StorageHandler.getTables();
-    let occuipiedTables = (await StorageHandler.getTables()).filter(i => reservations.some(reservations => reservations.table == i));
-    tmpTables.forEach(i => {
-        if (!occuipiedTables.includes(i)) {
-            freeTables.push(i);
-        }
-    })
+    //let occuipiedTables = (await StorageHandler.getTables()).filter(i => reservations.some(reservations => reservations.table == i));
+    freeTables =tmpTables.filter(i => i.status == Status.free)
     res.status(200).send(freeTables)
 })
-app.get("/table/free", async (req: Request, res: Response) => {
-    if(!req.body.numberOfPeople || !req.body.date) {
+app.post("/tables/free/numberOfPeople", async (req: Request, res: Response) => {
+    if(!req.body.date || !req.body.numberOfPeople) {
         return res.status(400).send("Bad request");
     }
-    const now = new Date(Date.now());
+    const now = new Date(req.body.date);
     let freeTables: Table[] = [];
     let reservations = (await StorageHandler.getReservations()).filter(reservation => reservation.start < now && reservation.end > now );
     let tmpTables = await StorageHandler.getTables();
@@ -128,30 +125,57 @@ app.get("/table/free", async (req: Request, res: Response) => {
     let freeTableForDate = freeTables.filter(i => i.numberOfPeople >= req.body.numberOfPeople);
     res.status(200).send(freeTableForDate);
 })
-app.get("/products/sort/:number/:order", async (req: Request, res: Response) => {
+app.get("/products/sort/:page/:order", async (req: Request, res: Response) => {
     switch (req.params.order) {
     case "asc": {
         const products = await StorageHandler.getProducts();
         products.sort((a, b) => a.name.localeCompare(b.name));
-        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
-        res.status(200).send(products)
+        res.status(200).send(products.slice(3 * (+req.params.page), 3 * (+req.params.page) + 3))
+        
         break;
     }
     case "desc": {
         const products = await StorageHandler.getProducts();
         products.sort((a, b) => b.name.localeCompare(a.name));
-        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
-        res.status(200).send(products)
+        res.status(200).send(products.slice(3 * (+req.params.page), 3 * (+req.params.page) + 3))
+        
         break;
     }
     default: {
         const products = await StorageHandler.getProducts();
-        res.status(200).send(products.slice(3 * (+req.params.number), 3 * (+req.params.number) + 3))
-        res.status(200).send(products)
+        res.status(200).send(products.slice(3 * (+req.params.page), 3 * (+req.params.page) + 3))
+       
         break;
     }
 }
 })
+app.get("/tables/report/:name", async (req: Request, res: Response) => {
+    const table = await StorageHandler.getTable(req.params.name)
+    console.log(table) 
+    if (!table)
+        return res.status(404).send("Not found")
+    const orders = await StorageHandler.getOrders()
+
+    const raport = orders.filter(element => element.table.name == table.name)
+    res.status(200).send(raport)
+})
+app.post("/tables/report/timeperiod", async (req: Request, res: Response) => {
+    const orders = await StorageHandler.getOrders()
+    const raport = orders.filter(element => element.date >= req.body.start && element.date <= req.body.end)
+    res.status(200).send(raport)
+
+})
+app.post("/tables/report/timeperiod/income", async (req: Request, res: Response) => {
+    const orders = await StorageHandler.getOrders()
+    const raport = orders.filter(element => element.date >= req.body.start && element.date <= req.body.end)
+    let income = 0
+    raport.forEach(element => {
+        income += element.total
+    })
+    res.status(200).send(income)
+    
+})
+
 app.post("/employee", async (req: Request, res: Response) => {
     if (!req.body.name || !req.body.surname || !req.body.category){
         return res.status(400).send("Bad request");
@@ -179,12 +203,26 @@ app.post("/order", async (req: Request, res: Response) => {
     }
     const employee = await StorageHandler.getEmployee(decoded.id);
     const table = await StorageHandler.getTable(req.body.table);
-    //tutaj 
-    if (!req.body.employee || !req.body.dishes || !req.body.status || !req.body.table){
+    if(!employee)
+        return res.status(401).send("CKX Bez odbioru.")
+    if (!req.body.dishes || !req.body.status || !req.body.table){
         return res.status(400).send("Bad request");
     }
-    const orderbody = new Order(req.body.employee, req.body.dishes, req.body.status, req.body.table, req.body.total);
+    const dishesFromBody:string[] = req.body.dishes
+    const dishes:Dish[] = []
+    for(const dishTmp of dishesFromBody){
+        const tmp = await StorageHandler.getDish(dishTmp)
+        if(tmp)
+        dishes.push(tmp)
+        else
+        return res.status(404).send("jkasbndfausjndb")
+    }
+
+    const orderbody = new Order(employee, dishes, req.body.status, table, req.body.total);
     const order = await StorageHandler.postOrder(orderbody);
+
+
+
     res.status(200).send(order);
 })
 app.post("/product", async (req: Request, res: Response) => {
@@ -196,22 +234,25 @@ app.post("/product", async (req: Request, res: Response) => {
     const product = await StorageHandler.postProduct(productbody);
     res.status(200).send(product);
 })
-app.post("/reservations", async (req: Request, res: Response) => {
+app.post("/reservation", async (req: Request, res: Response) => {
     if (!req.body.client || !req.body.table || !req.body.start || !req.body.end){
         return res.status(400).send("Bad request");
     }
     const _Reservations = await StorageHandler.getReservations()
     const _Tables = await StorageHandler.getTables()
-    let reservations = _Reservations.filter(i => (req.body.start <= i.start && i.start < req.body.end) || (req.body.end >= i.end && i.end > req.body.start))
-    let freeTables = _Tables.filter(i => !reservations.some(reservations => reservations.table == i))
-    const table = freeTables.find(table => table.numberOfPeople >= req.body.numberOfPeople && table.status != Status.outoforder)
-    if (!table){
-        const tmp = new Reservations(req.body.table, req.body.start, req.body.end, req.body.client )
-        await StorageHandler.postReservation(tmp)
-        res.status(200).send(table)
-    }else{
-        return res.status(404).send("No free table")
+    const reqStart = new Date(req.body.start)
+    const reqEnd = new Date(req.body.end)
+    //let reservations = _Reservations.filter((elemeent:Reservations) => true)
+    let reservations = _Reservations.filter(rezerwacja => (reqStart <= rezerwacja.start && rezerwacja.start < reqEnd) || (reqEnd >= rezerwacja.end && rezerwacja.end > reqStart))
+    const b:Table = await StorageHandler.getTable(req.body.table)
+    if(!b){
+        return res.status(400).send("Bad request")
     }
+    if(reservations.some(reservation => reservation.table.name == b.name))
+        return res.status(400).send("Table is occupied")
+    const tmp = new Reservations(b, req.body.start, req.body.end, req.body.client )
+    await StorageHandler.postReservation(tmp)
+    res.status(200).send("OK")
 })
 app.post("/table", async (req: Request, res: Response) => {
     if (!req.body.name || !req.body.status || !req.body.numberOfPeople){
@@ -222,11 +263,11 @@ app.post("/table", async (req: Request, res: Response) => {
     res.status(200).send(table);
 })
 app.post("/login/:id", async (req: Request, res: Response) => {
-    let employee : Employee
+    let employee : any
     try{
         employee = await StorageHandler.getEmployee(req.params.id);
         if(employee){
-            res.status(200).send(jsonwebtoken.sign({employee: employee}, "2137", {expiresIn: "1h"}));
+            res.status(200).send(jsonwebtoken.sign({id: employee._id}, "2137", {expiresIn: "1h"}));
         }
         else{
             return res.status(404).send("Employee not found");
@@ -254,6 +295,7 @@ app.put("/order/:id", async (req: Request, res: Response) => {
 })
 app.put("/product/:name", async (req: Request, res: Response) => {
     const productbody = new Product(req.body.name ?? undefined, req.body.price ?? undefined, req.body.quantity ?? undefined , req.body.unitOfMeasure ?? undefined, req.body.demand ?? undefined);
+    
     const product = await StorageHandler.putProduct(productbody, req.params.name);
     res.status(200).send(product);
 })
@@ -263,13 +305,13 @@ app.put("/reservation/:id", async (req: Request, res: Response) => {
     res.status(200).send(reservation);
 })
 app.put("/table/:name", async (req: Request, res: Response) => {
-    const tablebody = new Table(req.body.name ?? undefined, req.body.status ?? undefined, req.body.numberOfPeople ?? undefined);
+    const tablebody = new Table(req.body.name ?? undefined, req.body.numberOfPeople ?? undefined, req.body.status ?? undefined,);
     const table = await StorageHandler.putTable(tablebody, req.params.name);
     res.status(200).send(table);
 })
-app.put("/restaurant/", async (req: Request, res: Response) => {
+app.put("/restaurant/:name", async (req: Request, res: Response) => {
     const restaurantbody = new Restaurant(req.body.name ?? undefined, req.body.addres ?? undefined, req.body.telephone ?? undefined, req.body.nip ?? undefined, req.body.email ?? undefined, req.body.www ?? undefined);
-    const restaurant = await StorageHandler.putRestaurant(restaurantbody, req.params.id);
+    const restaurant = await StorageHandler.putRestaurant(restaurantbody, req.params.name);
     res.status(200).send(restaurant);
 })
 

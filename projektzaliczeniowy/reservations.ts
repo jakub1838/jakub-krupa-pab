@@ -1,11 +1,11 @@
 import { Table } from './table'
 export class Reservations {
-    table: Table[]
+    table: Table
     start: Date
     end: Date
     client: string
     //_id: number
-    constructor(table: Table[], start: Date, end: Date, client: string){
+    constructor(table: Table, start: Date, end: Date, client: string){
         this.table = table
         this.start = start
         this.end = end
