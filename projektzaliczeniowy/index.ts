@@ -161,18 +161,19 @@ app.get("/tables/report/:name", async (req: Request, res: Response) => {
 })
 app.post("/tables/report/timeperiod", async (req: Request, res: Response) => {
     const orders = await StorageHandler.getOrders()
-    const raport = orders.filter(element => element.date >= req.body.start && element.date <= req.body.end)
+    const raport = orders.filter(element => element.date >= new Date(req.body.start) && element.date <= new Date(req.body.end))
     res.status(200).send(raport)
 
 })
 app.post("/tables/report/timeperiod/income", async (req: Request, res: Response) => {
     const orders = await StorageHandler.getOrders()
-    const raport = orders.filter(element => element.date >= req.body.start && element.date <= req.body.end)
+    const raport = orders.filter(element => element.date >= new Date(req.body.start) && element.date <= new Date(req.body.end))
     let income = 0
+    console.log(raport)
     raport.forEach(element => {
         income += element.total
     })
-    res.status(200).send(income)
+    res.status(200).send(income.toString())
     
 })
 
@@ -215,7 +216,7 @@ app.post("/order", async (req: Request, res: Response) => {
         if(tmp)
         dishes.push(tmp)
         else
-        return res.status(404).send("jkasbndfausjndb")
+        return res.status(404).send("hejiojfsjdf")
     }
 
     const orderbody = new Order(employee, dishes, req.body.status, table, req.body.total);
